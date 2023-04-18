@@ -1,0 +1,53 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/quay-bridge-operator.openshift-operators: ""
+  name: quay-bridge-operator
+  namespace: openshift-operators
+spec:
+  channel: stable-3.8
+  installPlanApproval: Automatic
+  name: quay-bridge-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/container-security-operator.openshift-operators: ""
+  name: container-security-operator
+  namespace: openshift-operators
+spec:
+  channel: stable-3.8
+  installPlanApproval: Automatic
+  name: container-security-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+# These need to be wired up in Quay before application:
+# https://access.redhat.com/documentation/en-us/red_hat_quay/3.8/html/manage_red_hat_quay/quay-bridge-operator#setting-up-quay-for-qbo
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: quay-bridge-token
+  namespace: openshift-operators
+type: Opaque
+stringData:
+  token: <replaceme>
+---
+apiVersion: quay.redhat.com/v1
+kind: QuayIntegration
+metadata:
+  name: quay
+spec:
+  clusterID: openshift
+  credentialsSecret:
+    key: token
+    name: quay-bridge-token
+    namespace: openshift-operators
+  insecureRegistry: false
+  quayHostname: https://<replaceme>
+  scheduledImageStreamImport: true
